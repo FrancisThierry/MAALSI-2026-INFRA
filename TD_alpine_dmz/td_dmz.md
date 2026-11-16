@@ -201,3 +201,27 @@ docker exec web_dmz ping -c 2 -W 1 10.10.2.10
 # Résultat attendu : 100% packet loss
 
 ```
+
+### Exercice système
+1. Ajouter un utlisateur à une machine
+2. Visualiser la liste des utilisateurs
+3. Ajouter un fichier readme dans le home de cet utilisateur.
+
+### Correction
+
+Entrer dans le conteneur `db_lan` avec un shell :
+
+```bash
+docker exec -ti db_lan sh
+```
+
+Puis, depuis le shell du conteneur Alpine, créer l'utilisateur `alice`, afficher les utilisateurs et créer son fichier `readme` :
+
+```sh
+adduser -D alice
+cat /etc/passwd
+echo "Fichier readme d'alice" > /home/alice/readme
+ls -l /home/alice/readme
+exit
+```
+
