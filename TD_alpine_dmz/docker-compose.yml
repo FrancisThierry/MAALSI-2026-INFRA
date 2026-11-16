@@ -1,0 +1,85 @@
+services:
+  # --- PARE-FEU / ROUTEUR CENTRAL ---
+  firewall:
+    image: alpine:latest
+    container_name: firewall
+    cap_add:
+      - NET_ADMIN
+    command: >
+      /bin/sh -c "
+      apk add --no-cache iproute2 iptables &&
+      sysctl -w net.ipv4.ip_forward=1 &&
+      tail -f /dev/null"
+    networks:
+      wan_net:
+        ipv4_address: 172.20.0.1
+      dmz_net:
+        ipv4_address: 10.10.1.1
+      lan_net:
+        ipv4_address: 10.10.2.1
+
+  # --- CLIENT EXTERNE (SIMULE INTERNET) ---
+  wan_client:
+    image: alpine:latest
+    container_name: wan_client
+    cap_add:
+      - NET_ADMIN
+    command: >
+      /bin/sh -c "
+      apk add --no-cache iproute2 iputils curl &&
+      ip route replace default via 172.20.0.1 &&
+      tail -f /dev/null"
+    networks:
+      wan_net:
+        ipv4_address: 172.20.0.10
+
+  # --- MACHINE 1 : SERVEUR WEB EN DMZ ---
+  web_dmz:
+    image: alpine:latest
+    container_name: web_dmz
+    cap_add:
+      - NET_ADMIN
+    command: >
+      /bin/sh -c "
+      apk add --no-cache iproute2 iputils nginx netcat-openbsd &&
+      ip route replace default via 10.10.1.1 &&
+      mkdir -p /run/nginx &&
+      echo '<h1>Bienvenue sur le serveur Web en DMZ</h1>' > /var/www/localhost/htdocs/index.html &&
+      nginx &&
+      tail -f /dev/null"
+    networks:
+      dmz_net:
+        ipv4_address: 10.10.1.10
+
+  # --- MACHINE 2 : SERVEUR SENSIBLE EN LAN ---
+  db_lan:
+    image: alpine:latest
+    container_name: db_lan
+    cap_add:
+      - NET_ADMIN
+    command: >
+      /bin/sh -c "
+      apk add --no-cache iproute2 iputils netcat-openbsd &&
+      ip route replace default via 10.10.2.1 &&
+      while true; do echo 'Donnees confidentielles BDD' | nc -l -p 3306; done"
+    networks:
+      lan_net:
+        ipv4_address: 10.10.2.10
+
+networks:
+  wan_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  dmz_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.1.0/24
+  lan_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.2.0/24
+
