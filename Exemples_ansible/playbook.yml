@@ -1,0 +1,7 @@
+---
+- name: Test de configuration locale
+  hosts: alpines
+  tasks:
+    - name: Afficher un message de confirmation
+      ansible.builtin.debug:
+        msg: "Environnement Ansible opérationnel sous WSL !"
