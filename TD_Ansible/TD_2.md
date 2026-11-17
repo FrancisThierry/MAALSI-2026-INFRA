@@ -1,0 +1,2 @@
+## TD 1 : Node et express
+Créer des playbook ansible qui ajoute des environnement de dev en nodejs avec express dans différentes version. Faire un audit des environnement. Et mettre à jours tous les environnement en fonction des l'audit.
