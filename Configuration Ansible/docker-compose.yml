@@ -1,0 +1,12 @@
+services:
+  alpine1:
+    build: .
+    container_name: alpine1
+
+  alpine2:
+    build: .
+    container_name: alpine2
+
+  alpine3:
+    build: .
+    container_name: alpine3
